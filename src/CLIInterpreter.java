@@ -12,6 +12,7 @@ public class CLIInterpreter {
         System.out.println(currentDirectory.toAbsolutePath().toString());
     }
 
+    // Function to navigate through folders
     //changes the directory
     public void cd(String path){
         Path newPath = currentDirectory.resolve(path).normalize();
@@ -25,12 +26,23 @@ public class CLIInterpreter {
 
     //make directory
     public void mkdir(String dirName){
-        Path newDir=currentDirectory.resolve(dirName).normalize();
+        Path newDir=currentDirectory.resolve(dirName);
         try{
             Files.createDirectory(newDir);
         }
         catch(IOException e){
             System.out.println("Failed to create directory"+e.getMessage());
+        }
+    }
+
+    //removes directory only if empty
+    public void rmdir(String dirName){
+        Path newDir=currentDirectory.resolve(dirName);
+        try{
+            Files.deleteIfExists(newDir);
+        }
+        catch(IOException e){
+            System.out.println("Failed to remove directory"+e.getMessage());
         }
     }
 

@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.stream.Stream;
+import java.util.Scanner;
 
 public class CLIInterpreter {
     private Path currentDirectory;
@@ -150,8 +151,6 @@ public class CLIInterpreter {
         }
     }
 
-
-
     public void help() {
         System.out.println("cat: Concatenates the content of the files and prints it.");
         System.out.println("cd: Changes the current directory");
@@ -165,6 +164,84 @@ public class CLIInterpreter {
         System.out.println("rm: Removes each given file.");
         System.out.println("rmdir: Removes each given directory only if it is empty");
         System.out.println("touch: Creates a file with each given name");
+    }
+
+    public void clear() {
+        try {
+            new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void more(boolean sorted) {
+        File files = new File(currentDirectory.toString());
+        File[] filesList = files.listFiles();
+        if (sorted) {
+            Arrays.sort(filesList, Comparator.comparing(File::getName));
+        } else {
+            Arrays.sort(filesList, Collections.reverseOrder(Comparator.comparing(File::getName)));
+        }
+        if (filesList.length == 0) {
+            System.out.println("File is Empty");
+        } else {
+            int i = 0;
+            for (;i < filesList.length && i < 2; i++) {
+                System.out.println(filesList[i].getName());
+            }
+            Scanner input = new Scanner(System.in);
+            String command = "";
+            while (!command.equals("q")) {
+                System.out.print("--More--");
+                command = input.nextLine().trim().toLowerCase();
+                clear();
+                i++;
+                if (i > filesList.length) i = filesList.length;
+                for (int j = 0; j < i; ++j) {
+                    System.out.println(filesList[j].getName());
+                }
+            }
+        }
+    }
+
+    public void less(boolean sorted) {
+        File files = new File(currentDirectory.toString());
+        File[] filesList = files.listFiles();
+
+        if (sorted) {
+            Arrays.sort(filesList, Comparator.comparing(File::getName));
+        } else {
+            Arrays.sort(filesList, Collections.reverseOrder(Comparator.comparing(File::getName)));
+        }
+
+        if (filesList.length == 0) {
+            System.out.println("File is Empty");
+        } else {
+            int i = 0;
+            for (;i < filesList.length && i < 2; i++) {
+                System.out.println(filesList[i].getName());
+            }
+            Scanner input = new Scanner(System.in);
+            String command = "";
+            while (!command.equals("q")) {
+                System.out.print(":");
+                command = input.nextLine().trim().toLowerCase();
+                clear();
+                if (command.equals("w")) {
+                    i++;
+                    if (i > filesList.length) i = filesList.length;
+                    for (int j = 0; j < i; ++j) {
+                        System.out.println(filesList[j].getName());
+                    }
+                } else if (command.equals("s")) {
+                    i--;
+                    if (i < 2) i = 2;
+                    for (int j = 0; j < i; ++j) {
+                        System.out.println(filesList[j].getName());
+                    }
+                }
+            }
+        }
     }
 
 }

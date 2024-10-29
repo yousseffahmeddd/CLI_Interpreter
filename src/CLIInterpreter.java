@@ -59,11 +59,22 @@ public class CLIInterpreter {
     }
 
     public void ls_r() {
-        File files = currentDirectory.toFile();
-        File[] filesList = files.listFiles();
-        Arrays.sort(filesList, Collections.reverseOrder(Comparator.comparing(File::getName)));
-        for (File file : filesList) {
-            System.out.print("-" + file.getName() + " ");
+        File[] files = currentDirectory.toFile().listFiles();
+        if(files!=null){
+            Arrays.sort(files, Collections.reverseOrder(Comparator.comparing(File::getName)));
+            for (File file : files) {
+                System.out.print("-" + file.getName() + " ");
+            }
+        }
+        System.out.println();
+    }
+
+    public void ls_a(){
+        File[] files = currentDirectory.toFile().listFiles();
+        if(files!=null){
+            for (File file : files) {
+                System.out.print("-" + file.getName() + " ");
+            }
         }
         System.out.println();
     }

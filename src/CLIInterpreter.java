@@ -1,6 +1,9 @@
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 public class CLIInterpreter {
     private Path currentDirectory;
     public CLIInterpreter(){
@@ -12,7 +15,6 @@ public class CLIInterpreter {
         System.out.println(currentDirectory.toAbsolutePath().toString());
     }
 
-    // Function to navigate through folders
     //changes the directory
     public void cd(String path){
         Path newPath = currentDirectory.resolve(path).normalize();
@@ -47,7 +49,7 @@ public class CLIInterpreter {
     }
 
     public void ls() {
-        File files = new File(app.currentDir);
+        File files = currentDirectory.toFile();
         File[] filesList = files.listFiles();
         Arrays.sort(filesList, Comparator.comparing(File::getName));
         for (File file : filesList) {
@@ -55,9 +57,9 @@ public class CLIInterpreter {
         }
         System.out.println();
     }
-    
+
     public void ls_r() {
-        File files = new File(app.currentDir);
+        File files = currentDirectory.toFile();
         File[] filesList = files.listFiles();
         Arrays.sort(filesList, Collections.reverseOrder(Comparator.comparing(File::getName)));
         for (File file : filesList) {
@@ -88,4 +90,5 @@ public class CLIInterpreter {
         System.out.println("rmdir: Removes each given directory only if it is empty");
         System.out.println("touch: Creates a file with each given name");
     }
+
 }

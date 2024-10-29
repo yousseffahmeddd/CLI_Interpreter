@@ -1,9 +1,12 @@
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.stream.Stream;
+
 public class CLIInterpreter {
     private Path currentDirectory;
     public CLIInterpreter(){
@@ -33,7 +36,7 @@ public class CLIInterpreter {
             Files.createDirectory(newDir);
         }
         catch(IOException e){
-            System.out.println("Failed to create directory"+e.getMessage());
+            System.out.println("Failed to create directory: "+e.getMessage());
         }
     }
 
@@ -44,10 +47,11 @@ public class CLIInterpreter {
             Files.deleteIfExists(newDir);
         }
         catch(IOException e){
-            System.out.println("Failed to remove directory"+e.getMessage());
+            System.out.println("Failed to remove directory: "+e.getMessage());
         }
     }
 
+    //lists the contents of the current directory sorted alphabetically
     public void ls() {
         File files = currentDirectory.toFile();
         File[] filesList = files.listFiles();
@@ -58,6 +62,7 @@ public class CLIInterpreter {
         System.out.println();
     }
 
+    //same as ls but in reverse order
     public void ls_r() {
         File[] files = currentDirectory.toFile().listFiles();
         if(files!=null){
@@ -69,6 +74,7 @@ public class CLIInterpreter {
         System.out.println();
     }
 
+    //display all entries even entries starting with '.'
     public void ls_a(){
         File[] files = currentDirectory.toFile().listFiles();
         if(files!=null){
@@ -79,6 +85,7 @@ public class CLIInterpreter {
         System.out.println();
     }
 
+    //moves one or more files/directory to a directory
     public void mv(String source, String destination) {
         try {
             Files.move(Paths.get(source), Paths.get(destination));
@@ -86,6 +93,64 @@ public class CLIInterpreter {
             System.out.println(e);
         }
     }
+
+    //creates a file with each given name
+    public void touch(String fileName){
+        Path filePath = currentDirectory.resolve(fileName);
+        try{
+            Files.createFile(filePath);
+        }
+        catch(IOException e){
+            System.out.println("Failed to create file: "+e.getMessage());
+        }
+    }
+
+    //removes each given file
+    public void rm(String fileName){
+        Path filePath = currentDirectory.resolve(fileName);
+        try{
+            Files.deleteIfExists(filePath);
+        }
+        catch(IOException e){
+            System.out.println("Failed to delete file: "+e.getMessage());
+        }
+    }
+
+    //concatenates the content of the file and prints it
+    public void cat(String fileName){
+        Path filePath = currentDirectory.resolve(fileName);
+        try(Stream<String> lines = Files.lines(filePath)){
+            lines.forEach(System.out::println);
+        }
+        catch(IOException e){
+            System.out.println("Error reading file: "+e.getMessage());
+        }
+    }
+
+    //writes to a file, overwriting existing content
+    public void writeToFile(String fileName,String content){
+        Path filePath = currentDirectory.resolve(fileName);
+        try(BufferedWriter writer=Files.newBufferedWriter(filePath)){
+            writer.write(content);
+        }
+        catch(IOException e){
+            System.out.println("Error writing to file: "+e.getMessage());
+        }
+    }
+
+    //appends to a file
+    public void appendToFile(String fileName, String content){
+        Path filePath = currentDirectory.resolve(fileName);
+        try(BufferedWriter writer = Files.newBufferedWriter(filePath,StandardOpenOption.APPEND)){
+            writer.write(content);
+        }
+        catch(IOException e){
+            System.out.println("Error appending to file: "+e.getMessage());
+
+        }
+    }
+
+
 
     public void help() {
         System.out.println("cat: Concatenates the content of the files and prints it.");

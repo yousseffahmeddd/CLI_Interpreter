@@ -89,7 +89,11 @@ public class CLIInterpreter {
     //moves one or more files/directory to a directory
     public void mv(String source, String destination) {
         try {
-            Files.move(Paths.get(source), Paths.get(destination));
+            if (Files.isDirectory(Paths.get(this.currentDirectory.toString(), destination))) {
+                Files.move(Paths.get(this.currentDirectory.toString(), source), Paths.get(this.currentDirectory.toString(), destination, source));
+            } else {
+                Files.move(Paths.get(this.currentDirectory.toString(), source), Paths.get(this.currentDirectory.toString(), destination));
+            }
         } catch (IOException e) {
             System.out.println(e);
         }

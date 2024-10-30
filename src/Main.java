@@ -9,6 +9,7 @@ public class Main {
             System.out.print(":-$ ");
 
             String command = input.nextLine().trim();
+            String temp = command;
             int spaceIndex = command.indexOf(" ");
             String path = "";
             if (spaceIndex != -1) {
@@ -18,11 +19,11 @@ public class Main {
 
             String pipeCommand = "";
             boolean pipe = true;
-            int pipeIndex = command.indexOf("|");
+            int pipeIndex = temp.indexOf("|");
 
             if (pipeIndex != -1) {
-                pipeCommand = command;
-                command = command.substring(0, pipeIndex).trim();
+                pipeCommand = temp;
+                temp = temp.substring(0, pipeIndex).trim();
                 pipeCommand = pipeCommand.substring(pipeIndex + 1, pipeCommand.length()).trim();
             } else {
                 pipe = false;
@@ -92,6 +93,16 @@ public class Main {
                     break;
                 case "help":
                     termenal.help();
+                    break;
+                case ">":
+                    String fileName = path.substring(0, path.indexOf(" ")).trim();
+                    String content = path.substring(path.indexOf(" "), path.length()).trim();
+                    termenal.writeToFile(fileName, content);
+                    break;
+                case ">>":
+                    String nameOfFile = path.substring(0, path.indexOf(" ")).trim();
+                    String FileAddedContent = path.substring(path.indexOf(" "), path.length()).trim();
+                    termenal.appendToFile(nameOfFile, FileAddedContent);
                     break;
                 case "q":
                     exit = true;

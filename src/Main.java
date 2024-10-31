@@ -29,9 +29,6 @@ public class Main {
                 pipe = false;
             }
 
-            System.out.println(path);
-            System.out.println(command);
-
             switch (command) {
                 case "pwd":
                     termenal.pwd();

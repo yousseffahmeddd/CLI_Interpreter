@@ -110,15 +110,16 @@ public class CLIInterpreter {
         }
     }
 
-    //removes each given file
-    public void rm(String fileName){
-        Path filePath = currentDirectory.resolve(fileName);
-        try{
-            Files.deleteIfExists(filePath);
+    //removes directory even if it is not empty
+    public void rm(String dirName) {
+        File dir = new File(currentDirectory.toString(), dirName);
+        if (dir.isDirectory()) {
+            for (File file : dir.listFiles()) {
+                rm(file.getAbsolutePath());
+                file.delete();
+            }
         }
-        catch(IOException e){
-            System.out.println("Failed to delete file: "+e.getMessage());
-        }
+        dir.delete();
     }
 
     //concatenates the content of the file and prints it

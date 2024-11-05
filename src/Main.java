@@ -39,11 +39,11 @@ public class Main {
                 case "ls":
                     if (pipe) {
                         if (pipeCommand.equals("more")) {
-                            termenal.more(true);
+                            termenal.more(true, true);
                         } else if (pipeCommand.equals("less")) {
-                            termenal.less(true);
+                            termenal.less(true, true);
                         } else {
-                            System.out.println("Invalid Pipe Command");
+                            termenal.ls();
                         }
                     } else {
                         termenal.ls();
@@ -52,9 +52,9 @@ public class Main {
                 case "ls-r":
                     if (pipe) {
                         if (pipeCommand.equals("more")) {
-                            termenal.more(false);
+                            termenal.more(false, true);
                         } else if (pipeCommand.equals("less")) {
-                            termenal.less(false);
+                            termenal.less(false, true);
                         } else {
                             System.out.println("Invalid Pipe Command");
                         }
@@ -63,7 +63,17 @@ public class Main {
                     }
                     break;
                 case "ls-a":
-                    termenal.ls_a();
+                    if (pipe) {
+                        if (pipeCommand.equals("more")) {
+                            termenal.more(true, false);
+                        } else if (pipeCommand.equals("less")) {
+                            termenal.less(true, false);
+                        } else {
+                            System.out.println("Invalid Pipe Command");
+                        }
+                    } else {
+                        termenal.ls_a();
+                    }
                     break;
                 case "mkdir":
                     termenal.mkdir(path);

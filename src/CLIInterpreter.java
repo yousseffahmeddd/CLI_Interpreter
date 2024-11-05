@@ -54,8 +54,7 @@ public class CLIInterpreter {
 
     //lists the contents of the current directory sorted alphabetically
     public void ls() {
-        File files = currentDirectory.toFile();
-        File[] filesList = files.listFiles();
+        File[] filesList = currentDirectory.toFile().listFiles();
         Arrays.sort(filesList, Comparator.comparing(File::getName));
         for (File file : filesList) {
             System.out.print("-" + file.getName() + " ");
@@ -114,12 +113,13 @@ public class CLIInterpreter {
     public void rm(String dirName) {
         File dir = new File(currentDirectory.toString(), dirName);
         if (dir.isDirectory()) {
+            // Recursively delete all files and subdirectories
             for (File file : dir.listFiles()) {
                 rm(file.getAbsolutePath());
                 file.delete();
             }
         }
-        dir.delete();
+        rmdir(dirName);
     }
 
     //concatenates the content of the file and prints it
@@ -175,12 +175,17 @@ public class CLIInterpreter {
         for (int i = 0; i < 30; i++) {
             System.out.println();
         }
-        System.out.print("\033[H");
     }
 
-    public void more(boolean sorted) {
-        File files = new File(currentDirectory.toString());
-        File[] filesList = files.listFiles();
+    public void more(boolean sorted, boolean hidden) {
+        File[] filesList;
+
+        if (hidden) {
+            filesList = new File(currentDirectory.toString()).listFiles(file -> !file.getName().startsWith("."));
+        } else {
+            filesList = new File(currentDirectory.toString()).listFiles();
+        }
+
         if (sorted) {
             Arrays.sort(filesList, Comparator.comparing(File::getName));
         } else {
@@ -208,9 +213,14 @@ public class CLIInterpreter {
         }
     }
 
-    public void less(boolean sorted) {
-        File files = new File(currentDirectory.toString());
-        File[] filesList = files.listFiles();
+    public void less(boolean sorted, boolean hidden) {
+        File[] filesList;
+
+        if (hidden) {
+            filesList = new File(currentDirectory.toString()).listFiles(file -> !file.getName().startsWith("."));
+        } else {
+            filesList = new File(currentDirectory.toString()).listFiles();
+        }
 
         if (sorted) {
             Arrays.sort(filesList, Comparator.comparing(File::getName));
@@ -231,15 +241,19 @@ public class CLIInterpreter {
                 System.out.print(":");
                 command = input.nextLine().trim().toLowerCase();
                 clear();
-                if (command.equals("w")) {
+                if (command.equals("s")) {
                     i++;
                     if (i > filesList.length) i = filesList.length;
                     for (int j = 0; j < i; ++j) {
                         System.out.println(filesList[j].getName());
                     }
-                } else if (command.equals("s")) {
+                } else if (command.equals("w")) {
                     i--;
                     if (i < 2) i = 2;
+                    for (int j = 0; j < i; ++j) {
+                        System.out.println(filesList[j].getName());
+                    }
+                } else {
                     for (int j = 0; j < i; ++j) {
                         System.out.println(filesList[j].getName());
                     }

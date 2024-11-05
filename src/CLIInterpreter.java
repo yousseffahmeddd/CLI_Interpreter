@@ -172,11 +172,10 @@ public class CLIInterpreter {
     }
 
     public void clear() {
-        try {
-            new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+        for (int i = 0; i < 30; i++) {
+            System.out.println();
         }
+        System.out.print("\033[H");
     }
 
     public void more(boolean sorted) {

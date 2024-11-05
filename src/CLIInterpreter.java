@@ -77,6 +77,7 @@ public class CLIInterpreter {
     //display all entries even entries starting with '.'
     public void ls_a(){
         File[] files = currentDirectory.toFile().listFiles();
+        Arrays.sort(files, Comparator.comparing(File::getName));
         if(files!=null){
             for (File file : files) {
                 System.out.print("-" + file.getName() + " ");

@@ -56,7 +56,7 @@ public class Main {
                         } else if (pipeCommand.equals("less")) {
                             termenal.less(false, true);
                         } else {
-                            System.out.println("Invalid Pipe Command");
+                            termenal.ls_r();
                         }
                     } else {
                         termenal.ls_r();
@@ -69,7 +69,7 @@ public class Main {
                         } else if (pipeCommand.equals("less")) {
                             termenal.less(true, false);
                         } else {
-                            System.out.println("Invalid Pipe Command");
+                            termenal.ls_a();
                         }
                     } else {
                         termenal.ls_a();

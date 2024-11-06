@@ -8,6 +8,8 @@ public class Main {
         while (!exit) {
             System.out.print(":-$ ");
 
+
+            //i8686
             String command = input.nextLine().trim();
             String temp = command;
             int spaceIndex = command.indexOf(" ");

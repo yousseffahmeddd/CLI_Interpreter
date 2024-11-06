@@ -2,8 +2,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -16,7 +18,6 @@ class CLIInterpreterTest {
 
     @BeforeEach
     void setUp() throws IOException {
-        // Create a temporary directory and initialize CLIInterpreter
         testDir = Files.createTempDirectory("CLI_Test");
         cliInterpreter = new CLIInterpreter();
         cliInterpreter.cd(testDir.toString());
@@ -67,12 +68,12 @@ class CLIInterpreterTest {
 
     @Test
     void testLs() throws IOException {
-        // Create some files to list
         Files.createFile(testDir.resolve("a.txt"));
         Files.createFile(testDir.resolve("b.txt"));
         Files.createFile(testDir.resolve("c.txt"));
+        Files.createFile(testDir.resolve(".hidden"));
+
         cliInterpreter.ls();
-        // Expected alphabetical order output in the CLI output
     }
 
     @Test
@@ -81,21 +82,21 @@ class CLIInterpreterTest {
         Files.createFile(testDir.resolve("a.txt"));
         Files.createFile(testDir.resolve("b.txt"));
         Files.createFile(testDir.resolve("c.txt"));
+        Files.createFile(testDir.resolve(".hidden"));
+
         cliInterpreter.ls_r();
-        // Expected reverse alphabetical order output in the CLI output
     }
 
     @Test
     void testLs_a() throws IOException {
-        // Create hidden file and check if it's displayed
         Files.createFile(testDir.resolve(".hidden"));
+        Files.createFile(testDir.resolve("b.txt"));
+        Files.createFile(testDir.resolve("a.txt"));
         cliInterpreter.ls_a();
-        // Check output contains ".hidden"
     }
 
     @Test
     void testMv() throws IOException {
-        // Move a file to another directory
         String sourceFile = "source.txt";
         String destinationDir = "destDir";
         Files.createFile(testDir.resolve(sourceFile));
@@ -107,19 +108,40 @@ class CLIInterpreterTest {
 
     @Test
     void testTouch() {
-        String fileName = "testFile.txt";
+        String fileName = "test.txt";
         cliInterpreter.touch(fileName);
         assertTrue(Files.exists(testDir.resolve(fileName)));
     }
 
     @Test
-    void testRm() throws IOException {
+    void testRmFile() throws IOException {
         String fileName = "testFile.txt";
         Path filePath = testDir.resolve(fileName);
         Files.createFile(filePath);
         cliInterpreter.rm(fileName);
         assertFalse(Files.exists(filePath));
     }
+
+    @Test
+    void testRmDirectory() throws IOException {
+        String dirName = "testDir";
+        Path dirPath = testDir.resolve(dirName);
+        Files.createDirectory(dirPath);
+
+        Files.createFile(dirPath.resolve("file1.txt"));
+        Files.createFile(dirPath.resolve("file2.txt"));
+
+        assertTrue(Files.exists(dirPath));
+        assertTrue(Files.exists(dirPath.resolve("file1.txt")));
+        assertTrue(Files.exists(dirPath.resolve("file2.txt")));
+
+        cliInterpreter.rm(dirName);
+
+        assertFalse(Files.exists(dirPath));
+        assertFalse(Files.exists(dirPath.resolve("file1.txt")));
+        assertFalse(Files.exists(dirPath.resolve("file2.txt")));
+    }
+
 
     @Test
     void testCat() throws IOException {
@@ -129,7 +151,6 @@ class CLIInterpreterTest {
         Path filePath = testDir.resolve(fileName);
         Files.write(filePath, content.getBytes());
         cliInterpreter.cat(fileName);
-        // Expected output: "Hello World" in the CLI output
     }
 
     @Test
@@ -153,28 +174,34 @@ class CLIInterpreterTest {
     @Test
     void testHelp() {
         cliInterpreter.help();
-        // Expected output with available commands in the CLI output
     }
 
     @Test
     void testClear() {
         cliInterpreter.clear();
-        // System clear output expected, tested visually
     }
-
+    
     @Test
     void testMore() throws IOException {
         Files.createFile(testDir.resolve("a.txt"));
         Files.createFile(testDir.resolve("b.txt"));
-        cliInterpreter.more(true);
-        // Expected interactive output, tested visually
+
+        String simulatedInput = "q\n";
+        InputStream in = new ByteArrayInputStream(simulatedInput.getBytes());
+        System.setIn(in);
+
+        cliInterpreter.more(true, true);
     }
-    
+
     @Test
     void testLess() throws IOException {
         Files.createFile(testDir.resolve("a.txt"));
         Files.createFile(testDir.resolve("b.txt"));
-        cliInterpreter.less(true);
-        // Expected interactive output, tested visually
+
+        String simulatedInput = "w\nq\n";
+        InputStream in = new ByteArrayInputStream(simulatedInput.getBytes());
+        System.setIn(in);
+
+        cliInterpreter.less(true, false);
     }
 }

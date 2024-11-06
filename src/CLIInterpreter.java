@@ -1,15 +1,13 @@
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.util.*;
+import java.io.BufferedWriter;
 import java.nio.file.*;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.stream.Stream;
-import java.util.Scanner;
+
 
 public class CLIInterpreter {
-    protected Path currentDirectory;
+    protected static Path currentDirectory;
     public CLIInterpreter(){
         this.currentDirectory = Paths.get(System.getProperty("user.dir"));
     }
@@ -32,7 +30,8 @@ public class CLIInterpreter {
 
     //make directory
     public void mkdir(String dirName){
-        Path newDir=currentDirectory.resolve(dirName);
+        String[] directories =  dirName.split(" ");
+        Path newDir=currentDirectory.resolve(directories[0]);
         try{
             Files.createDirectory(newDir);
         }
@@ -43,7 +42,8 @@ public class CLIInterpreter {
 
     //removes directory only if empty
     public void rmdir(String dirName){
-        Path newDir=currentDirectory.resolve(dirName);
+        String[] directories =  dirName.split(" ");
+        Path newDir=currentDirectory.resolve(directories[0]);
         try{
             Files.deleteIfExists(newDir);
         }
@@ -52,16 +52,7 @@ public class CLIInterpreter {
         }
     }
 
-    //lists the contents of the current directory sorted alphabetically
-    public void ls() {
-        File files = currentDirectory.toFile();
-        File[] filesList = files.listFiles();
-        Arrays.sort(filesList, Comparator.comparing(File::getName));
-        for (File file : filesList) {
-            System.out.print("-" + file.getName() + " ");
-        }
-        System.out.println();
-    }
+
 
     //same as ls but in reverse order
     public void ls_r() {
@@ -69,6 +60,21 @@ public class CLIInterpreter {
         if(files!=null){
             Arrays.sort(files, Collections.reverseOrder(Comparator.comparing(File::getName)));
             for (File file : files) {
+                if(!file.getName().startsWith(".")){
+                    System.out.print("-" + file.getName() + " ");
+                }
+            }
+        }
+        System.out.println();
+    }
+
+    //lists the contents of the current directory sorted alphabetically
+    public void ls() {
+        File[] files = currentDirectory.toFile().listFiles();
+
+        Arrays.sort(files, Comparator.comparing(File::getName));
+        for (File file : files) {
+            if(!file.getName().startsWith(".")){
                 System.out.print("-" + file.getName() + " ");
             }
         }
@@ -78,6 +84,7 @@ public class CLIInterpreter {
     //display all entries even entries starting with '.'
     public void ls_a(){
         File[] files = currentDirectory.toFile().listFiles();
+        Arrays.sort(files, Comparator.comparing(File::getName));
         if(files!=null){
             for (File file : files) {
                 System.out.print("-" + file.getName() + " ");
@@ -101,24 +108,33 @@ public class CLIInterpreter {
 
     //creates a file with each given name
     public void touch(String fileName){
-        Path filePath = currentDirectory.resolve(fileName);
+        String[] directories =  fileName.split(" ");
+        ArrayList<Path> newDir = new ArrayList<>();
+        for (int i = 0; i < directories.length; i++) {
+            newDir.add(Paths.get(this.currentDirectory.toString(), directories[i]));
+        }
+
         try{
-            Files.createFile(filePath);
+            for (Path path : newDir) {
+                Files.createFile(path);
+            }
         }
         catch(IOException e){
             System.out.println("Failed to create file: "+e.getMessage());
         }
     }
 
-    //removes each given file
-    public void rm(String fileName){
-        Path filePath = currentDirectory.resolve(fileName);
-        try{
-            Files.deleteIfExists(filePath);
+    //removes directory even if it is not empty
+    public void rm(String dirName) {
+        File dir = new File(currentDirectory.toString(), dirName);
+        if (dir.isDirectory()) {
+            // Recursively delete all files and subdirectories
+            for (File file : dir.listFiles()) {
+                rm(file.getAbsolutePath());
+                file.delete();
+            }
         }
-        catch(IOException e){
-            System.out.println("Failed to delete file: "+e.getMessage());
-        }
+        rmdir(dirName);
     }
 
     //concatenates the content of the file and prints it
@@ -171,16 +187,21 @@ public class CLIInterpreter {
     }
 
     public void clear() {
-        try {
-            new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+        for (int i = 0; i < 30; i++) {
+            System.out.println();
         }
+        System.out.print("\033[H");
     }
 
-    public void more(boolean sorted) {
-        File files = new File(currentDirectory.toString());
-        File[] filesList = files.listFiles();
+    public void more(boolean sorted, boolean hidden) {
+        File[] filesList;
+
+        if (hidden) {
+            filesList = new File(currentDirectory.toString()).listFiles(file -> !file.getName().startsWith("."));
+        } else {
+            filesList = new File(currentDirectory.toString()).listFiles();
+        }
+
         if (sorted) {
             Arrays.sort(filesList, Comparator.comparing(File::getName));
         } else {
@@ -208,9 +229,14 @@ public class CLIInterpreter {
         }
     }
 
-    public void less(boolean sorted) {
-        File files = new File(currentDirectory.toString());
-        File[] filesList = files.listFiles();
+    public void less(boolean sorted, boolean hidden) {
+        File[] filesList;
+
+        if (hidden) {
+            filesList = new File(currentDirectory.toString()).listFiles(file -> !file.getName().startsWith("."));
+        } else {
+            filesList = new File(currentDirectory.toString()).listFiles();
+        }
 
         if (sorted) {
             Arrays.sort(filesList, Comparator.comparing(File::getName));
@@ -231,15 +257,19 @@ public class CLIInterpreter {
                 System.out.print(":");
                 command = input.nextLine().trim().toLowerCase();
                 clear();
-                if (command.equals("w")) {
+                if (command.equals("s")) {
                     i++;
                     if (i > filesList.length) i = filesList.length;
                     for (int j = 0; j < i; ++j) {
                         System.out.println(filesList[j].getName());
                     }
-                } else if (command.equals("s")) {
+                } else if (command.equals("w")) {
                     i--;
                     if (i < 2) i = 2;
+                    for (int j = 0; j < i; ++j) {
+                        System.out.println(filesList[j].getName());
+                    }
+                } else {
                     for (int j = 0; j < i; ++j) {
                         System.out.println(filesList[j].getName());
                     }
@@ -247,5 +277,6 @@ public class CLIInterpreter {
             }
         }
     }
-
 }
+
+

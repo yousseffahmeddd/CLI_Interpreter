@@ -3,7 +3,7 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
-        CLIInterpreter termenal = new CLIInterpreter();
+        CLIInterpreter terminal = new CLIInterpreter();
         boolean exit = false;
         while (!exit) {
             System.out.print(":-$ ");
@@ -29,80 +29,88 @@ public class Main {
                 pipe = false;
             }
 
-            System.out.println(path);
-            System.out.println(command);
-
             switch (command) {
                 case "pwd":
-                    termenal.pwd();
+                    terminal.pwd();
                     break;
                 case "cd":
-                    termenal.cd(path);
+                    terminal.cd(path);
                     break;
                 case "ls":
                     if (pipe) {
                         if (pipeCommand.equals("more")) {
-                            termenal.more(true);
+                            terminal.more(true, true);
                         } else if (pipeCommand.equals("less")) {
-                            termenal.less(true);
+                            terminal.less(true, true);
                         } else {
-                            System.out.println("Invalid Pipe Command");
+                            terminal.ls();
                         }
                     } else {
-                        termenal.ls();
+                        terminal.ls();
                     }
                     break;
                 case "ls-r":
                     if (pipe) {
                         if (pipeCommand.equals("more")) {
-                            termenal.more(false);
+                            terminal.more(false, true);
                         } else if (pipeCommand.equals("less")) {
-                            termenal.less(false);
+                            terminal.less(false, true);
                         } else {
-                            System.out.println("Invalid Pipe Command");
+                            terminal.ls_r();
                         }
                     } else {
-                        termenal.ls_r();
+                        terminal.ls_r();
                     }
                     break;
                 case "ls-a":
-                    termenal.ls_a();
+                    if (pipe) {
+                        if (pipeCommand.equals("more")) {
+                            terminal.more(true, false);
+                        } else if (pipeCommand.equals("less")) {
+                            terminal.less(true, false);
+                        } else {
+                            terminal.ls_a();
+                        }
+                    } else {
+                        terminal.ls_a();
+                    }
                     break;
                 case "mkdir":
-                    termenal.mkdir(path);
+                    terminal.mkdir(path);
                     break;
                 case "rmdir":
-                    termenal.rmdir(path);
+                    terminal.rmdir(path);
                     break;
                 case "touch":
-                    termenal.touch(path);
+                    terminal.touch(path);
                     break;
                 case "mv":
                     String path1 = path.substring(0, path.indexOf(" ")).trim();
                     String path2 = path.substring(path.indexOf(" "), path.length()).trim();
-                    termenal.mv(path1, path2);
+                    terminal.mv(path1, path2);
                     break;
                 case "rm":
-                    termenal.rm(path);
+                    terminal.rm(path);
                     break;
                 case "cat":
-                    termenal.cat(path);
+
+                    terminal.cat(path);
                     break;
                 case "clear":
-                    termenal.clear();
+                    terminal.clear();
                     break;
                 case "help":
-                    termenal.help();
+                    terminal.help();
                     break;
                 case ">":
                     String fileName = path.substring(0, path.indexOf(" ")).trim();
                     String content = path.substring(path.indexOf(" "), path.length()).trim();
-                    termenal.writeToFile(fileName, content);
+                    terminal.writeToFile(fileName, content);
                     break;
                 case ">>":
                     String nameOfFile = path.substring(0, path.indexOf(" ")).trim();
                     String FileAddedContent = path.substring(path.indexOf(" "), path.length()).trim();
-                    termenal.appendToFile(nameOfFile, FileAddedContent);
+                    terminal.appendToFile(nameOfFile, FileAddedContent);
                     break;
                 case "q":
                     exit = true;
